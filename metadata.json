@@ -1,0 +1,6 @@
+{
+  "name": "EconWorld News",
+  "description": "An ad-free, premium news platform for economic and world affairs, connecting immediate local events directly to global macroeconomic trends.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
