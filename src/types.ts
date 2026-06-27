@@ -14,6 +14,7 @@ export interface NewsArticle {
   category: string;
   readTime: string;
   globalConnection: string;
+  isBroken?: boolean;
 }
 
 export interface CategorySummary {

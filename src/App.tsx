@@ -84,6 +84,21 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
 
+  // Attempt to geolocate user's general location via IP on initial load
+  useEffect(() => {
+    fetch('https://ipapi.co/json/')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.city) {
+          const regionString = data.region ? `${data.city}, ${data.region}` : data.city;
+          setLocation(regionString);
+        }
+      })
+      .catch((err) => {
+        console.warn("IP geolocation bypassed or rate-limited. Defaulting to New York, NY:", err);
+      });
+  }, []);
+
   // Fetch Category function memoized to avoid re-trigger cycles on dependency arrays as outlined in React guidelines
   const fetchCategoryNews = useCallback(async (cat: NewsCategory, loc: string) => {
     setLoading(true);
@@ -252,21 +267,45 @@ export default function App() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: idx * 0.05 }}
-                    onClick={() => setSelectedArticle(article)}
-                    className="flex flex-col justify-between bg-white border border-stone-200 rounded-xl p-5 hover:shadow-md transition duration-200 cursor-pointer group hover:border-neutral-350 select-none"
+                    className="flex flex-col justify-between bg-white border border-stone-200 rounded-xl p-5 hover:shadow-md transition duration-200 group hover:border-neutral-350"
                   >
                     {/* Top Row: publisher & date */}
                     <div>
                       <div className="flex items-center justify-between gap-2.5 mb-3 text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
-                        <span className="bg-stone-100 hover:bg-stone-200 text-neutral-700 font-semibold px-2 py-0.5 rounded transition">
-                          {article.source}
-                        </span>
+                        {article.isBroken ? (
+                          <span className="bg-stone-100 text-neutral-500 font-semibold px-2 py-0.5 rounded">
+                            {article.source}
+                          </span>
+                        ) : (
+                          <a
+                            href={article.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            referrerPolicy="no-referrer"
+                            className="bg-stone-100 hover:bg-emerald-50 hover:text-emerald-950 text-neutral-700 font-semibold px-2 py-0.5 rounded transition"
+                          >
+                            {article.source}
+                          </a>
+                        )}
                         <span>{article.date}</span>
                       </div>
 
                       {/* Main Title */}
-                      <h4 className="font-serif text-[17px] font-bold text-neutral-900 group-hover:text-emerald-950 transition-colors leading-snug tracking-tight mb-2">
-                        {article.title}
+                      <h4 className="font-serif text-[17px] font-bold text-neutral-900 group-hover:text-emerald-950 leading-snug tracking-tight mb-2">
+                        {article.isBroken ? (
+                          <span className="text-neutral-900">{article.title}</span>
+                        ) : (
+                          <a
+                            href={article.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            referrerPolicy="no-referrer"
+                            className="hover:underline hover:text-emerald-800 transition-colors inline-flex items-start gap-1"
+                          >
+                            <span>{article.title}</span>
+                            <ArrowUpRight className="w-4.5 h-4.5 text-neutral-400 shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </a>
+                        )}
                       </h4>
 
                       {/* Subtitle */}
@@ -283,11 +322,37 @@ export default function App() {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex items-center justify-between text-xs font-semibold text-emerald-800 font-sans">
-                        <div className="flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                          <Play className="w-3.5 h-3.5 text-emerald-800 fill-emerald-800" />
-                          <span>Immersive Room</span>
+                      <div className="flex items-center justify-between text-xs font-semibold font-sans">
+                        <div className="flex items-center gap-2">
+                          {/* Direct External Link */}
+                          {article.isBroken ? (
+                            <span className="inline-flex items-center gap-1.5 bg-stone-100 text-stone-500 text-[11px] font-medium px-3 py-1.5 rounded select-none border border-stone-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                              <span>Article unavailable or moved</span>
+                            </span>
+                          ) : (
+                            <a
+                              href={article.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              referrerPolicy="no-referrer"
+                              className="inline-flex items-center gap-1 bg-stone-100 hover:bg-stone-200 text-stone-750 px-2.5 py-1.5 rounded transition"
+                            >
+                              <ArrowUpRight className="w-3.5 h-3.5" />
+                              <span>Read Article</span>
+                            </a>
+                          )}
+
+                          {/* Immersive AI Analysis Room */}
+                          <button
+                            onClick={() => setSelectedArticle(article)}
+                            className="inline-flex items-center gap-1 bg-emerald-950 hover:bg-emerald-900 text-white px-2.5 py-1.5 rounded transition cursor-pointer"
+                          >
+                            <Play className="w-3.5 h-3.5 text-white fill-white" />
+                            <span>AI Room</span>
+                          </button>
                         </div>
+                        
                         <span className="text-[10px] bg-stone-100 text-neutral-500 px-2 py-0.5 rounded font-mono">
                           {article.readTime}
                         </span>

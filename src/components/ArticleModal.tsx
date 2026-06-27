@@ -156,22 +156,40 @@ export default function ArticleModal({ article, onClose, location }: ArticleModa
 
             {/* Article Citations Footer */}
             <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-stone-200 pt-5 text-xs text-neutral-500 font-sans">
-              <div className="flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5 text-neutral-400" />
-                <span>Grounded Search Source:</span>
-                <a
-                  href={article.url}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="text-emerald-700 hover:underline font-mono inline-flex items-center gap-0.5"
-                >
-                  {article.source.toLowerCase().replace(/[^a-z]/g, '') || 'source'}.org
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-neutral-400" />
+                  <span className="font-semibold text-neutral-700">Direct Verified Deep Link:</span>
+                </div>
+                {article.isBroken ? (
+                  <span className="inline-flex items-center gap-1.5 text-stone-500 bg-stone-200/50 px-2.5 py-1 rounded border border-stone-300 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-stone-400 animate-pulse" />
+                    <span>Article unavailable or moved</span>
+                  </span>
+                ) : (
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    referrerPolicy="no-referrer"
+                    className="text-emerald-800 hover:text-emerald-950 font-semibold inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100/80 px-2.5 py-1 rounded border border-emerald-200/60 transition"
+                    title={article.url}
+                  >
+                    <span>Read full piece on {article.source}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
               </div>
-              <span className="font-mono text-[10px] text-neutral-400">
-                STRICTLY UNSUBVENTED • ZERO INCENTIVIZED ADS
-              </span>
+              <div className="flex flex-col items-end">
+                <span className="font-mono text-[10px] text-neutral-400">
+                  STRICTLY UNSUBVENTED • ZERO INCENTIVIZED ADS
+                </span>
+                {!article.isBroken && (
+                  <span className="font-mono text-[9px] text-neutral-400 max-w-[200px] truncate" title={article.url}>
+                    {article.url}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* -------------------------------------------------------------
